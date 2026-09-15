@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://devoteddividend.com/sitemap.xml
+Sitemap: https://marvinsmx.github.io/devoted-dividend/sitemap.xml
