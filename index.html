@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- ===== CRITICAL META FIRST (crawlers read a limited byte budget) ===== -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dividend Portfolio | Investment Dashboard</title>
+    <meta name="description" content="Real-time dividend income tracker. See all my dividend holdings for FREE! Updated frequently.">
+    <link rel="canonical" href="https://devoteddividend.com/">
+
+    <!-- Open Graph / Social Media Preview -->
+    <meta property="og:site_name" content="DevotedDividend">
+    <meta property="og:title" content="DevotedDividend's Portfolio Dashboard">
+    <meta property="og:description" content="Real-time dividend income tracker. See all my dividend holdings for FREE! Updated frequently.">
+    <meta property="og:image" content="https://devoteddividend.com/media1.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="DevotedDividend portfolio dashboard preview">
+    <meta property="og:url" content="https://devoteddividend.com/">
+    <meta property="og:type" content="website">
+
+    <!-- Twitter / X Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@DevotedDividend">
+    <meta name="twitter:creator" content="@DevotedDividend">
+    <meta name="twitter:title" content="DevotedDividend's Portfolio Dashboard">
+    <meta name="twitter:description" content="Live dividend tracker • Holdings & income estimates • Powered by Google Sheets">
+    <meta name="twitter:image" content="https://devoteddividend.com/media1.png">
+    <meta name="twitter:image:alt" content="DevotedDividend portfolio dashboard preview">
+
+    <!-- Favicons -->
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="theme-color" content="#0a0e1a">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Crimson+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <!-- ===== SCRIPTS AFTER META ===== -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-REPLACE_ME"
+         crossorigin="anonymous"></script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-REPLACE_ME"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-REPLACE_ME');
+    </script>
+
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #0f1420;
+            --bg-tertiary: #141927;
+            --accent-primary: #00ff88;
+            --accent-secondary: #0088ff;
+            --accent-danger: #ff4466;
+            --text-primary: #e8eaf0;
+            --text-secondary: #9ba3b4;
+            --text-muted: #6b7280;
+            --border-color: #1f2937;
+            --card-bg: rgba(20, 25, 39, 0.6);
+            --glow-green: rgba(0, 255, 136, 0.15);
+            --glow-blue: rgba(0, 136, 255, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+            overscroll-behavior-y: none;
+            padding-bottom: 110px; /* Space for sticky banner */
+        }
+
+        /* Animated Background Grid */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        /* Gradient Orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.15;
+            pointer-events: none;
+            z-index: 1;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .orb-1 {
+            width: 500px;
+            height: 500px;
+            background: var(--accent-primary);
+            top: -250px;
+            right: -250px;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 400px;
+            height: 400px;
+            background: var(--accent-secondary);
+            bottom: -200px;
+            left: -200px;
+            animation-delay: 5s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Header */
+        header {
+            padding: 3rem 0 2rem;
+            border-bottom: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+            background: rgba(10, 14, 26, 0.8);
+        }
+
+        h1 {
+            font-family: 'Crimson Pro', serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: white;
+            letter-spacing: -0.02em;
+            text-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+        }
+
+        .header-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+
+        .logo-img {
+            height: 80px;
+            width: auto;
+            filter: drop-shadow(0 0 20px rgba(0, 255, 136, 0.3));
+            animation: logoFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+
+        /* === STICKY YOUTUBE BANNER STYLES === */
+        .sticky-yt-ad {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 9000;
+            background: linear-gradient(90deg, #0a0e1a 0%, #0d1a0f 50%, #0a0e1a 100%);
+            border-top: 2px solid var(--accent-primary);
+            box-shadow: 0 -4px 40px rgba(0, 255, 136, 0.25);
+            transform: translateY(100%);
+            animation: slideUpBar 0.6s cubic-bezier(0.22, 1, 0.36, 1) 3s forwards;
+        }
+        @keyframes slideUpBar { to { transform: translateY(0); } }
+
+        .sticky-yt-ad-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0.75rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+        }
+        .sticky-yt-left { display: flex; align-items: center; gap: 1rem; flex: 1; }
+
+        .yt-play-icon {
+            width: 44px;
+            height: 44px;
+            background: #ff0000;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 0 16px rgba(255, 0, 0, 0.5);
+        }
+        .yt-play-icon svg { width: 20px; height: 20px; fill: white; }
+
+        .sticky-yt-text .headline { 
+            font-family: 'Crimson Pro', serif; 
+            font-size: 1.15rem; 
+            font-weight: 700; 
+            color: white; 
+            line-height: 1.2; 
+        }
+        .sticky-yt-text .sub { 
+            font-size: 0.75rem; 
+            color: var(--text-secondary); 
+            margin-top: 1px; 
+        }
+
+        .sticky-yt-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.4rem;
+            background: var(--accent-primary);
+            color: #0a0e1a;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 20px rgba(0, 255, 136, 0.4);
+        }
+        .sticky-yt-cta:hover { 
+            background: #00e077; 
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 30px rgba(0, 255, 136, 0.5); 
+        }
+
+        .sticky-yt-dismiss { 
+            background: none; 
+            border: none; 
+            color: var(--text-muted); 
+            font-size: 1.3rem; 
+            cursor: pointer; 
+            padding: 4px 8px; 
+            line-height: 1; 
+            flex-shrink: 0; 
+            transition: color 0.2s ease; 
+        }
+        .sticky-yt-dismiss:hover { color: var(--accent-primary); }
+
+        .live-dot { 
+            display: inline-block; 
+            width: 8px; 
+            height: 8px; 
+            background: #ff0000; 
+            border-radius: 50%; 
+            margin-right: 4px; 
+            animation: pulseDot 1.5s ease-in-out infinite; 
+        }
+        @keyframes pulseDot { 
+            0%, 100% { opacity: 1; transform: scale(1); } 
+            50% { opacity: 0.4; transform: scale(0.7); } 
+        }
+
+        @media (max-width: 900px) { 
+            .sticky-yt-text .sub { display: none; } 
+        }
+        @media (max-width: 600px) { 
+            .sticky-yt-ad-inner { padding: 0.6rem 1rem; } 
+            .sticky-yt-text .headline { font-size: 0.95rem; } 
+        }
+        /* === END STICKY BANNER STYLES === */
+
+        /* Banner Slots */
+        .banner-slot {
+            margin: 1.5rem 0;
+            padding: 2.5rem 2rem;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.05), rgba(0, 136, 255, 0.05));
+            border: 2px dashed var(--border-color);
+            border-radius: 16px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .banner-slot::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .banner-slot:hover {
+            border-color: var(--accent-primary);
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.08), rgba(0, 136, 255, 0.08));
+            transform: translateY(-3px);
+        }
+
+        .banner-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .banner-title {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.6rem;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .banner-subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .banner-link {
+            color: var(--accent-primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .banner-link:hover {
+            text-decoration: underline;
+            color: var(--accent-secondary);
+        }
+
+        /* Horizontal promo banner grid */
+        .promo-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .promo-banner {
+            padding: 1rem 1.2rem;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.05), rgba(0, 136, 255, 0.05));
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 120px;
+        }
+
+        .promo-banner:hover {
+            border-color: var(--accent-primary);
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.08), rgba(0, 136, 255, 0.08));
+            transform: translateY(-3px);
+        }
+
+        .promo-banner .banner-title {
+            font-size: 1.4rem;
+            margin-bottom: 0.4rem;
+            line-height: 1.2;
+        }
+
+        .promo-banner .banner-subtitle {
+            font-size: 0.95rem;
+            line-height: 1.3;
+        }
+
+        /* === IMAGE DISPLAY BANNER === */
+        .image-display-banner-wrap {
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .image-display-banner {
+            border-radius: 16px;
+            overflow: hidden;
+            display: inline-block;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .image-display-banner:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0, 255, 136, 0.2);
+        }
+
+        .image-display-banner img {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+        /* === END IMAGE DISPLAY BANNER === */
+
+        /* Holdings Table */
+        .holdings-section {
+            margin: 3rem 0;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-family: 'Crimson Pro', serif;
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .filters {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            border-color: var(--accent-primary);
+            box-shadow: 0 4px 16px var(--glow-green);
+        }
+
+        /* Search Bar */
+        .search-container {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .search-bar {
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px var(--glow-green);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* Dividend Income Stats */
+        .dividend-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+            padding: 0 1rem;
+        }
+
+        .dividend-stat-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .dividend-stat-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-primary);
+            box-shadow: 0 8px 32px var(--glow-green);
+        }
+
+        .dividend-stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+        }
+
+        .dividend-stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            font-family: 'Crimson Pro', serif;
+        }
+
+        .dividend-stat-sublabel {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        .table-container {
+            background: var(--card-bg);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--bg-secondary);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        th {
+            padding: 1.25rem 1rem;
+            text-align: left;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        th:hover {
+            color: var(--accent-primary);
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        th.sortable::after {
+            content: '⇅';
+            position: absolute;
+            right: 0.5rem;
+            opacity: 0.3;
+            font-size: 0.9rem;
+        }
+
+        th.sort-asc::after {
+            content: '↑';
+            opacity: 1;
+            color: var(--accent-primary);
+        }
+
+        th.sort-desc::after {
+            content: '↓';
+            opacity: 1;
+            color: var(--accent-primary);
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            animation: fadeIn 0.5s ease-out backwards;
+        }
+
+        tbody tr:nth-child(1) { animation-delay: 0.05s; }
+        tbody tr:nth-child(2) { animation-delay: 0.1s; }
+        tbody tr:nth-child(3) { animation-delay: 0.15s; }
+        tbody tr:nth-child(4) { animation-delay: 0.2s; }
+        tbody tr:nth-child(5) { animation-delay: 0.25s; }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        tbody tr:hover {
+            background: rgba(0, 255, 136, 0.03);
+            transform: scale(1.01);
+        }
+
+        td {
+            padding: 1.25rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .ticker {
+            font-weight: 700;
+            color: var(--accent-primary);
+            font-size: 1rem;
+        }
+
+        .company-name {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+
+        .positive {
+            color: var(--accent-primary);
+        }
+
+        .negative {
+            color: var(--accent-danger);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-high {
+            background: rgba(0, 255, 136, 0.15);
+            color: var(--accent-primary);
+            border: 1px solid var(--accent-primary);
+        }
+
+        .badge-medium {
+            background: rgba(0, 136, 255, 0.15);
+            color: var(--accent-secondary);
+            border: 1px solid var(--accent-secondary);
+        }
+
+        .badge-low {
+            background: rgba(255, 68, 102, 0.15);
+            color: var(--accent-danger);
+            border: 1px solid var(--accent-danger);
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--bg-secondary);
+            border-radius: 3px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 3px;
+            transition: width 1s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: progressShine 2s infinite;
+        }
+
+        @keyframes progressShine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 4rem;
+            padding: 2rem 0;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .promo-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .promo-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .promo-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .promo-banner {
+                padding: 0.8rem 1.2rem;
+            }
+
+            .promo-banner .banner-title {
+                font-size: 1.3rem;
+            }
+
+            .promo-banner .banner-subtitle {
+                font-size: 1rem;
+            }
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-8px);
+            padding: 0.5rem 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .tooltip:hover::after {
+            opacity: 1;
+        }
+
+        /* Promotion Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 14, 26, 0.88);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2.5rem 2rem;
+            max-width: 420px;
+            width: 90%;
+            position: relative;
+            box-shadow: 0 0 40px var(--glow-green);
+            transform: translateY(30px);
+            transition: transform 0.4s ease;
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 2.2rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            line-height: 1;
+            padding: 0 8px;
+        }
+
+        .modal-close:hover {
+            color: var(--accent-primary);
+        }
+
+        #go-to-etfs {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            padding: 0.9rem 1.8rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.2s ease;
+        }
+
+        #go-to-etfs:hover {
+            background: #00e077;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px var(--glow-green);
+        }
+
+        #close-modal-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.9rem 1.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.2s ease;
+        }
+
+        #close-modal-btn:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="header-logo">
+                <img src="https://i.postimg.cc/GBFTBfX1/Devoted-Dividends-Logo.png" alt="DevotedDividends Logo" class="logo-img">
+                <h1>DevotedDividend's Portfolio</h1>
+            </div>
+        </header>
+
+        <!-- Added content - right above the banners -->
+        <div style="text-align: center; margin: 2rem 0 2rem;">
+            <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">My Portfolio 🧑‍💼</h1>
+            <p style="color: var(--text-secondary); max-width: 800px; margin: 0 auto; font-size: 1.1rem;">
+                <strong>Disclaimer:</strong><br>
+                Nothing here is financial advice. Nothing is a buy or sell signal.<br>
+                Portfolio holdings are updated often but can be inaccurate at times.<br>
+                <em>For entertainment purposes only.</em><br>
+                 <em>*Current or previous sponsors & affiliate links are used on this website*</em>
+            </p>
+        </div>
+
+        <!-- Horizontal promo banners grid -->
+        <div class="promo-grid">
+            <div class="promo-banner">
+                <div class="banner-content">
+                    <a href="https://yieldatlas.com/" target="_blank" class="banner-link">
+                        <div class="banner-title">Top 100 Dividend ETFs 💵</div>
+                        <div class="banner-subtitle">Explore the complete list </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="promo-banner">
+                <div class="banner-content">
+                    <a href="https://weeklypayout.com/" target="_blank" class="banner-link">
+                        <div class="banner-title">Top 100 Weekly Paying ETFs 📅</div>
+                        <div class="banner-subtitle">Weekly dividend calculator & rankings </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="promo-banner">
+                <div class="banner-content">
+                    <a href="https://www.youtube.com/@DevotedDividend" target="_blank" class="banner-link">
+                        <div class="banner-title">My YouTube Channel 📹</div>
+                        <div class="banner-subtitle">Dividend investing tips & updates </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="promo-banner">
+                <div class="banner-content">
+                    <a href="https://dividendempire2000.gumroad.com/l/DividendInvestingg?layout=profile" target="_blank" class="banner-link">
+                        <div class="banner-title">Grab My Dividend Investing Guide 💰</div>
+                        <div class="banner-subtitle">Step-by-step beginner to advanced guide </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="promo-banner">
+                <div class="banner-content">
+                    <a href="https://dividendstack.com/" target="_blank" class="banner-link">
+                        <div class="banner-title">DividendStack 🛠️</div>
+                        <div class="banner-subtitle">Discover the best tools for dividend investors </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- StockAnalysis.com Pro Banner -->
+        <div class="promo-grid" style="margin: 1.5rem 0;">
+            <div class="promo-banner" style="grid-column: span 5; min-height: 140px;">
+                <div class="banner-content">
+                    <a href="https://stockanalysis.com/pro/?ref=Dividend" target="_blank" class="banner-link">
+                        <div class="banner-title" style="font-size: 1.7rem; color: #00ff88;">📊 StockAnalysis.com Pro</div>
+                        <div class="banner-subtitle" style="font-size: 1.05rem;">Professional stock & ETF research • Financial statements • Valuation tools • Unlimited access</div>
+                        <div style="margin-top: 12px; color: #00ff88; font-weight: 700;">Discount Code: DIVIDEND - 10% OFF Site-Wide!<br>Special access via my link →</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- FastGraphs Image Display Banner -->
+        <div class="image-display-banner-wrap">
+            <a href="https://www.fastgraphs.com/?utm_source=partner&utm_medium=devoteddividend&utm_campaign=june2026banner" target="_blank" rel="noopener" class="image-display-banner">
+                <img src="https://devoteddividend.com/fast.jpg" alt="FastGraphs - The Fundamental Analyzer" />
+            </a>
+        </div>
+
+        <!-- Holdings Section -->
+        <section class="holdings-section">
+            <div class="section-header">
+                <h2 class="section-title">Current Holdings</h2>
+                <div class="filters">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="high">High Yield</button>
+                    <button class="filter-btn" data-filter="ultra">Ultra High Yield</button>
+                    <button class="filter-btn" data-filter="growth">Growth</button>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-container">
+                <div class="search-bar">
+                    <input 
+                        type="text" 
+                        id="search-input" 
+                        class="search-input" 
+                        placeholder="🔍 Search holdings by symbol, company name..."
+                    />
+                </div>
+            </div>
+
+            <!-- Dividend Income Stats -->
+            <div class="dividend-stats">
+                <div class="dividend-stat-card">
+                    <div class="dividend-stat-label">Annual Income</div>
+                    <div class="dividend-stat-value" id="annual-income">$0</div>
+                    <div class="dividend-stat-sublabel">Per Year</div>
+                </div>
+                <div class="dividend-stat-card">
+                    <div class="dividend-stat-label">Monthly Income</div>
+                    <div class="dividend-stat-value" id="monthly-income">$0</div>
+                    <div class="dividend-stat-sublabel">Per Month</div>
+                </div>
+                <div class="dividend-stat-card">
+                    <div class="dividend-stat-label">Weekly Income</div>
+                    <div class="dividend-stat-value" id="weekly-income">$0</div>
+                    <div class="dividend-stat-sublabel">Per Week</div>
+                </div>
+            </div>
+
+            <div class="table-container" id="table-wrapper">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Loading your dividend holdings...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Horizontal promo banners grid -->
+        <h1 style="text-align: center; color: white; font-size: 3.5rem; font-weight: 700; margin: 2rem 0 1.5rem; text-shadow: 0 0 15px rgba(0, 255, 136, 0.3);">
+            My favorite investing tools 👇
+        </h1>
+        <div class="promo-grid">
+            <div class="promo-banner">
+                <div class="banner-content">
+                    <a href="https://yieldatlas.com/" target="_blank" class="banner-link">
+                        <div class="banner-title">Top 100 Dividend ETFs 💵</div>
+                        <div class="banner-subtitle">Explore the complete list </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="promo-banner">
+                <div class="banner-content">
+                    <a href="https://weeklypayout.com/" target="_blank" class="banner-link">
+                        <div class="banner-title">Top 100 Weekly Paying ETFs 📅</div>
+                        <div class="banner-subtitle">Weekly dividend calculator & rankings </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="promo-banner">
+                <div class="banner-content">
+                    <a href="https://www.youtube.com/@DevotedDividend" target="_blank" class="banner-link">
+                        <div class="banner-title">My YouTube Channel 📹</div>
+                        <div class="banner-subtitle">Dividend investing tips & updates </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="promo-banner">
+                <div class="banner-content">
+                    <a href="https://dividendempire2000.gumroad.com/l/DividendInvestingg?layout=profile" target="_blank" class="banner-link">
+                        <div class="banner-title">Grab My Dividend Investing Guide 💰</div>
+                        <div class="banner-subtitle">Step-by-step beginner to advanced guide </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="promo-banner">
+                <div class="banner-content">
+                    <a href="https://dividendstack.com/" target="_blank" class="banner-link">
+                        <div class="banner-title">DividendStack 🛠️</div>
+                        <div class="banner-subtitle">Discover the best tools for dividend investors </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- StockAnalysis.com Pro Banner -->
+        <div class="promo-grid" style="margin: 1.5rem 0;">
+            <div class="promo-banner" style="grid-column: span 5; min-height: 140px;">
+                <div class="banner-content">
+                    <a href="https://stockanalysis.com/pro/?ref=Dividend" target="_blank" class="banner-link">
+                        <div class="banner-title" style="font-size: 1.7rem; color: #00ff88;">📊 StockAnalysis.com Pro</div>
+                        <div class="banner-subtitle" style="font-size: 1.05rem;">Professional stock & ETF research • Financial statements • Valuation tools • Unlimited access</div>
+                        <div style="margin-top: 12px; color: #00ff88; font-weight: 700;">Special access via my link →</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer style="text-align: center; padding: 2rem 0; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.875rem;">
+            <p style="margin-bottom: 1rem;">
+                <a href="/terms-of-use.html" style="color: var(--text-secondary); margin: 0 1rem; text-decoration: none;">Terms of Use</a> •
+                <a href="/privacy.html" style="color: var(--text-secondary); margin: 0 1rem; text-decoration: none;">Privacy Policy</a> •
+                <a href="mailto:advertise@mrvn.me" style="color: var(--text-secondary); margin: 0 1rem; text-decoration: none;">Contact</a>
+            </p>
+
+            <p style="font-weight: 600; color: white; margin: 0.5rem 0;">
+Disclaimer: DevotedDividend.com is for educational purposes only. Data and information may be inaccurate or outdated. Investing carries risk, including loss of principal. We are not financial advisors & this is NOT Financial Advice. Always consult a licensed financial advisor before making investment decisions.            </p>
+
+            <p style="margin-top: 0.5rem;">
+                Dividend Portfolio Dashboard • Last Updated: <span id="last-update"></span>
+            </p>
+        </footer>
+    </div>
+<p style="margin: 2rem auto; max-width: 800px; font-size: 0.85rem; color: #6b7280; text-align: center;">
+    <strong>Affiliate Disclosure:</strong> Some links on this site are affiliate links. I may earn a small commission if you make a purchase through these links, at no extra cost to you. 
+    Thank you for supporting this site.
+</p>
+    <!-- STICKY YOUTUBE BANNER -->
+    <div class="sticky-yt-ad" id="sticky-yt-bar">
+        <div class="sticky-yt-ad-inner">
+            <div class="sticky-yt-left">
+                <div class="yt-play-icon">
+                    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                </div>
+                <div class="sticky-yt-text">
+                    <div class="headline"><span class="live-dot"></span>Want to start dividend investing? WATCH my <strong>FREE beginner guide</strong></div>
+                    <div class="sub">youtube.com/@DevotedDividend • Step-by-step • No experience needed</div>
+                </div>
+            </div>
+            <a href="https://www.youtube.com/watch?v=_7ibdhrr19w" target="_blank" rel="noopener" class="sticky-yt-cta">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                Watch Free
+            </a>
+            <button class="sticky-yt-dismiss" id="dismiss-sticky" title="Dismiss">×</button>
+        </div>
+    </div>
+
+    <!-- Promotion Modal -->
+    <div id="promo-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <button id="close-modal" class="modal-close">×</button>
+            <h2 style="color: var(--accent-primary); margin-bottom: 1rem; font-size: 1.8rem;">Top 100 Dividend ETFs</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1.8rem; font-size: 1.1rem; line-height: 1.5;">
+                Want to see Top 100 Dividend ETFs right now?<br>
+                Sorted by current yield & NO price decay!
+            </p>
+            <div style="display: flex; gap: 1.2rem; justify-content: center; flex-wrap: wrap;">
+                <a href="https://yieldatlas.com/" target="_blank" id="go-to-etfs">
+                    Yes — Show me The ETF List (it's FREE! 🙂)
+                </a>
+                <button id="close-modal-btn">
+                    No thanks, i'll go to YieldAtlas.com later!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script>
+        // Your Google Sheets CSV URL
+        const SHEET_URL = 'data/seed.csv';
+
+        // Update timestamp
+        document.getElementById('last-update').textContent = new Date().toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        // Fetch and parse the Google Sheets data
+        async function loadHoldings() {
+            try {
+                const response = await fetch(SHEET_URL);
+                const csvText = await response.text();
+                
+                Papa.parse(csvText, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: function(results) {
+                        console.log('Parsed data:', results.data);
+                        renderTable(results.data);
+                        updateStats(results.data);
+                    },
+                    error: function(error) {
+                        console.error('Parse error:', error);
+                        showError('Error parsing spreadsheet data');
+                    }
+                });
+            } catch (error) {
+                console.error('Fetch error:', error);
+                showError('Could not load spreadsheet data');
+            }
+        }
+
+        function renderTable(data) {
+            const tableWrapper = document.getElementById('table-wrapper');
+            
+            if (!data || data.length === 0) {
+                tableWrapper.innerHTML = '<div class="loading"><p>No holdings data found</p></div>';
+                return;
+            }
+
+            const headers = Object.keys(data[0]);
+
+            data = data.filter(row => {
+                const firstCol = Object.values(row)[0];
+                if (!firstCol || firstCol.trim() === '') return false;
+                if (String(firstCol).includes('$') || String(firstCol).toLowerCase().includes('total')) return false;
+                if (String(firstCol).toLowerCase().trim() === headers[0].toLowerCase().trim()) return false;
+                return true;
+            });
+
+            if (data.length === 0) {
+                tableWrapper.innerHTML = '<div class="loading"><p>No holdings data found</p></div>';
+                return;
+            }
+            
+            let tableHTML = `
+                <table id="holdings-table">
+                    <thead>
+                        <tr>
+                            ${headers.map((header, index) => `<th class="sortable" data-column="${index}" data-type="auto">${header}</th>`).join('')}
+                        </tr>
+                    </thead>
+                    <tbody id="holdings-body">
+            `;
+
+            data.forEach((row, index) => {
+                let category = 'growth';
+                const yieldValue = parseFloat(String(row['Dividend Yield'] || row['Yield'] || '0').replace(/[%$,]/g, ''));
+                if (yieldValue > 20) category = 'ultra';
+                else if (yieldValue > 3) category = 'high';
+
+                tableHTML += `<tr data-category="${category}" style="animation-delay: ${index * 0.05}s;">`;
+                
+                headers.forEach((header, colIndex) => {
+                    let cellValue = row[header] || '';
+                    let cellClass = '';
+                    
+                    if (colIndex === 0 && cellValue) {
+                        cellValue = `<div class="ticker">${cellValue}</div>`;
+                    } else if (String(cellValue).includes('%')) {
+                        const numValue = parseFloat(String(cellValue).replace(/[%$,]/g, ''));
+                        cellClass = numValue >= 0 ? 'positive' : 'negative';
+                    } else if (String(cellValue).match(/^\$?-?\d+[\d,]*\.?\d*$/)) {
+                        const numValue = parseFloat(String(cellValue).replace(/[$,]/g, ''));
+                        if (header.toLowerCase().includes('gain') || header.toLowerCase().includes('loss') || header.toLowerCase().includes('return')) {
+                            cellClass = numValue >= 0 ? 'positive' : 'negative';
+                        }
+                    }
+                    
+                    tableHTML += `<td class="${cellClass}">${cellValue}</td>`;
+                });
+                
+                tableHTML += '</tr>';
+            });
+
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+
+            tableWrapper.innerHTML = tableHTML;
+
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                tbody tr { animation: fadeIn 0.5s ease-out backwards; }
+            `;
+            document.head.appendChild(style);
+
+            setupFilters();
+        }
+
+        function updateStats(data) {
+            if (!data || data.length === 0) return;
+
+            let totalAnnualIncome = 0;
+            const headers = Object.keys(data[0]);
+            
+            if (headers.length >= 8) {
+                const column8Name = headers[7];
+                const cellH2Value = data[0][column8Name];
+                if (cellH2Value) {
+                    totalAnnualIncome = parseFloat(String(cellH2Value).replace(/[$,]/g, ''));
+                }
+            }
+
+            if (isNaN(totalAnnualIncome) || totalAnnualIncome === 0) {
+                for (let i = 0; i < Math.min(3, data.length); i++) {
+                    const row = data[i];
+                    for (let key in row) {
+                        const value = row[key];
+                        if (String(value).includes('$') && String(value).includes(',')) {
+                            const numValue = parseFloat(String(value).replace(/[$,]/g, ''));
+                            if (numValue > 1000) {
+                                totalAnnualIncome = numValue;
+                                break;
+                            }
+                        }
+                    }
+                    if (totalAnnualIncome > 0) break;
+                }
+            }
+
+            const monthlyIncome = totalAnnualIncome / 12;
+            const weeklyIncome = totalAnnualIncome / 52;
+
+            document.getElementById('annual-income').textContent = formatCurrency(totalAnnualIncome);
+            document.getElementById('monthly-income').textContent = formatCurrency(monthlyIncome);
+            document.getElementById('weekly-income').textContent = formatCurrency(weeklyIncome);
+        }
+
+        function formatCurrency(value) {
+            if (value >= 1000000) return '$' + (value / 1000000).toFixed(2) + 'M';
+            else if (value >= 10000) return '$' + (value / 1000).toFixed(1) + 'K';
+            else if (value >= 1000) return '$' + (value / 1000).toFixed(2) + 'K';
+            else return '$' + value.toFixed(2);
+        }
+
+        function setupFilters() {
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            const tableRows = document.querySelectorAll('#holdings-body tr');
+            const searchInput = document.getElementById('search-input');
+            const tableHeaders = document.querySelectorAll('th.sortable');
+            let currentFilter = 'all';
+            let currentSort = { column: -1, direction: 'none' };
+
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentFilter = btn.dataset.filter;
+                    applyFilters();
+                });
+            });
+
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => applyFilters());
+            }
+
+            tableHeaders.forEach(header => {
+                header.addEventListener('click', () => {
+                    const columnIndex = parseInt(header.dataset.column);
+                    
+                    if (currentSort.column === columnIndex) {
+                        if (currentSort.direction === 'asc') currentSort.direction = 'desc';
+                        else if (currentSort.direction === 'desc') {
+                            currentSort.direction = 'none';
+                            currentSort.column = -1;
+                        } else currentSort.direction = 'asc';
+                    } else {
+                        currentSort.column = columnIndex;
+                        currentSort.direction = 'asc';
+                    }
+
+                    tableHeaders.forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
+                    if (currentSort.direction === 'asc') header.classList.add('sort-asc');
+                    else if (currentSort.direction === 'desc') header.classList.add('sort-desc');
+
+                    sortTable(columnIndex, currentSort.direction);
+                    applyFilters();
+                });
+            });
+
+            function sortTable(columnIndex, direction) {
+                if (direction === 'none') return;
+
+                const tbody = document.getElementById('holdings-body');
+                const rowsArray = Array.from(tbody.querySelectorAll('tr'));
+
+                rowsArray.sort((a, b) => {
+                    let aValue = a.cells[columnIndex].textContent.trim();
+                    let bValue = b.cells[columnIndex].textContent.trim();
+
+                    const aNum = parseFloat(aValue.replace(/[$,%]/g, '').replace(/,/g, ''));
+                    const bNum = parseFloat(bValue.replace(/[$,%]/g, '').replace(/,/g, ''));
+
+                    let comparison = 0;
+                    if (!isNaN(aNum) && !isNaN(bNum)) comparison = aNum - bNum;
+                    else comparison = aValue.localeCompare(bValue);
+
+                    return direction === 'asc' ? comparison : -comparison;
+                });
+
+                rowsArray.forEach(row => tbody.appendChild(row));
+            }
+
+            function applyFilters() {
+                const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+
+                tableRows.forEach(row => {
+                    const matchesFilter = currentFilter === 'all' || row.dataset.category === currentFilter;
+                    const matchesSearch = searchTerm === '' || row.textContent.toLowerCase().includes(searchTerm);
+
+                    row.style.display = (matchesFilter && matchesSearch) ? '' : 'none';
+                });
+            }
+
+            tableRows.forEach(row => {
+                row.addEventListener('mouseenter', () => row.style.transform = 'scale(1.01)');
+                row.addEventListener('mouseleave', () => row.style.transform = 'scale(1)');
+            });
+        }
+
+        function showError(message) {
+            const tableWrapper = document.getElementById('table-wrapper');
+            tableWrapper.innerHTML = `
+                <div class="loading">
+                    <p style="color: var(--accent-danger);">${message}</p>
+                    <p style="margin-top: 1rem; font-size: 0.875rem;">Please check your spreadsheet URL and ensure it's published to the web.</p>
+                </div>
+            `;
+        }
+
+        // Promotion modal logic - shows only once, after 15 seconds
+        document.addEventListener('DOMContentLoaded', () => {
+            const modal = document.getElementById('promo-modal');
+            const closeBtns = document.querySelectorAll('#close-modal, #close-modal-btn');
+            const goBtn = document.getElementById('go-to-etfs');
+
+            const hasSeenPromo = localStorage.getItem('seenYieldAtlasPromo');
+
+            if (!hasSeenPromo && modal) {
+                setTimeout(() => {
+                    modal.style.display = 'flex';
+                    setTimeout(() => modal.classList.add('show'), 100);
+                }, 15000); // 15 seconds
+            }
+
+            closeBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    modal.classList.remove('show');
+                    setTimeout(() => {
+                        modal.style.display = 'none';
+                    }, 400);
+                    localStorage.setItem('seenYieldAtlasPromo', 'true');
+                });
+            });
+
+            if (goBtn) {
+                goBtn.addEventListener('click', () => {
+                    localStorage.setItem('seenYieldAtlasPromo', 'true');
+                });
+            }
+
+            // Dismiss sticky banner
+            const dismissBtn = document.getElementById('dismiss-sticky');
+            const stickyBar = document.getElementById('sticky-yt-bar');
+            if (dismissBtn && stickyBar) {
+                dismissBtn.addEventListener('click', () => {
+                    stickyBar.style.transition = 'transform 0.4s ease';
+                    stickyBar.style.transform = 'translateY(100%)';
+                    setTimeout(() => stickyBar.style.display = 'none', 500);
+                });
+            }
+        });
+
+        loadHoldings();
+    </script>
+</body>
+</html>
